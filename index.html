@@ -17,161 +17,168 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aboreto&family=Work+Sans:ital,wght@0,200;0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
+/* ---------------------------------------------------------------------------
+   Geometry matched to the original Wix site, measured off its live DOM at a
+   1920px viewport. The numbers here are measurements, not taste:
+     content column 753px centred        hero h1 47px / 0.7em tracking
+     sections 930 / 1631 / 599 / 420     gallery items 428x241, 10px gap
+   Wix darkens the photo with section overlays, never in the image file, and
+   runs a single fixed page-background photo behind every section.
+--------------------------------------------------------------------------- */
 :root{
-  --red:#8B0000;            /* ABOUT band + header, sampled from the original */
+  --red:#8B0000;
   --red-nav:rgba(139,0,0,.77);
-  --brown:#7B503B;          /* contact base tone */
   --ink:#0d0d0d;
-  --white:#fff;
   --display:"Aboreto",Georgia,serif;
   --body:"Work Sans",system-ui,-apple-system,sans-serif;
-  --wrap:1180px;
-  --navh:72px;
+  --col:753px;
+  --navh:57px;
+  --item:min(428px,100%);   /* 428 in the 753 column, exactly one item wide on phones */
+  --gap:10px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scroll-padding-top:var(--navh)}
-/* overflow-x:clip, never hidden: `hidden` on body promotes body to its own scroll
-   container, which stops scroll events reaching window and silently kills every
-   scroll-driven behaviour on the page. */
-body{background:var(--ink);color:var(--white);font-family:var(--body);font-weight:300;line-height:1.62;-webkit-font-smoothing:antialiased;overflow-x:clip}
+/* clip, never hidden: `hidden` promotes body to its own scroll container, which
+   stops scroll events reaching window and silently kills every scroll handler. */
+body{background:var(--ink);color:#fff;font-family:var(--body);font-weight:300;
+  line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:clip}
 img{display:block;max-width:100%}
 a{color:inherit}
 :focus-visible{outline:2px solid #fff;outline-offset:3px}
 
-/* ---------- header ---------- */
+/* one fixed page-background photo behind everything, as Wix does.
+   hero.jpg is already greyscale and naturally dark — no runtime filter. */
+.pagebg{position:fixed;inset:0;z-index:-2;background:#000 url("images/hero.jpg") center 22%/cover no-repeat}
+
+/* ---------- header: 57px, translucent red ---------- */
 .nav{position:fixed;inset:0 0 auto 0;z-index:50;height:var(--navh);
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 clamp(18px,4vw,54px);
-  background:var(--red-nav);
-  transition:background .35s ease, height .35s ease}
-.nav.solid{background:var(--red);height:62px}
-.brand{display:flex;align-items:center;gap:13px;text-decoration:none;flex:none}
-.brand::before{content:"";width:1px;height:34px;background:rgba(255,255,255,.55)}
-.brand span{font-family:var(--display);font-size:.9rem;line-height:1.12;letter-spacing:.06em;display:block}
-.menu{display:flex;gap:clamp(16px,2.6vw,38px);list-style:none}
-.menu a{font-size:.95rem;font-weight:300;letter-spacing:.02em;text-decoration:none;color:#fff;opacity:.92;position:relative;padding:4px 0;transition:opacity .2s}
-.menu a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.22,1,.36,1)}
-.menu a:hover{opacity:1}
+  padding:0 clamp(18px,2.4vw,46px);background:var(--red-nav);transition:background .3s}
+.nav.solid{background:var(--red)}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;flex:none}
+.brand::before{content:"";width:1px;height:30px;background:rgba(255,255,255,.55)}
+.brand span{font-family:var(--display);font-size:.8rem;line-height:1.14;letter-spacing:.04em;display:block}
+.menu{display:flex;gap:clamp(16px,2vw,34px);list-style:none}
+.menu a{font-size:17px;font-weight:300;text-decoration:none;color:#fff;position:relative;padding:3px 0}
+.menu a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:#fff;
+  transform:scaleX(0);transform-origin:right;transition:transform .35s cubic-bezier(.22,1,.36,1)}
 .menu a:hover::after{transform:scaleX(1);transform-origin:left}
-.burger{display:none;background:none;border:0;color:#fff;width:40px;height:40px;cursor:pointer}
-.burger span,.burger span::before,.burger span::after{content:"";position:absolute;width:22px;height:1.5px;background:#fff;transition:transform .3s,opacity .3s}
+.burger{display:none;background:none;border:0;width:38px;height:38px;cursor:pointer}
+.burger span,.burger span::before,.burger span::after{content:"";position:absolute;width:21px;height:1.5px;background:#fff;transition:transform .3s}
 .burger span{position:relative;display:block;margin:0 auto}
-.burger span::before{top:-7px}.burger span::after{top:7px}
+.burger span::before{top:-6px}.burger span::after{top:6px}
 .nav.open .burger span{background:transparent}
-.nav.open .burger span::before{transform:translateY(7px) rotate(45deg)}
-.nav.open .burger span::after{transform:translateY(-7px) rotate(-45deg)}
+.nav.open .burger span::before{transform:translateY(6px) rotate(45deg)}
+.nav.open .burger span::after{transform:translateY(-6px) rotate(-45deg)}
 
-/* ---------- hero ---------- */
-.hero{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:flex-end;
-  padding:var(--navh) clamp(20px,6vw,90px) 10vh;overflow:hidden}
-/* hero.jpg ships pre-converted to greyscale and pre-darkened, so this fixed layer needs no
-   runtime filter — a filtered full-viewport fixed layer repaints on every frame. */
-.pagebg{position:fixed;inset:0;z-index:-2;background:#000 url("images/hero.jpg") center 22%/cover no-repeat}
-.hero::after{content:"";position:absolute;inset:0;z-index:1;
-  background:linear-gradient(90deg,rgba(13,13,13,.30) 0%,rgba(13,13,13,0) 45%),
-             linear-gradient(0deg,rgba(13,13,13,.55) 0%,rgba(13,13,13,0) 42%)}
-.hero-inner{position:relative;z-index:2;text-align:right;max-width:min(100%,780px)}
-.hero h1{font-family:var(--display);font-weight:400;color:#fff;
-  font-size:clamp(1.9rem,5.4vw,3.1rem);line-height:1.3;
-  letter-spacing:clamp(.16em,.7vw,.72em);
-  text-indent:clamp(.16em,.7vw,.72em)} /* balances the trailing track */
+/* ---------- hero: 930px, no overlay (Wix has none) ---------- */
+.hero{position:relative;min-height:977px;display:flex;align-items:flex-start;
+  justify-content:flex-end;padding-top:188px}
+.hero-inner{text-align:right;margin-right:max(20px,calc(50vw - 497px))}
+.hero h1{font-family:var(--display);font-weight:700;color:#fff;
+  font-size:clamp(1.65rem,2.9vw,47px);line-height:1.18;letter-spacing:.7em;
+  margin-right:-.7em}        /* trailing track hangs out, so glyphs sit flush right */
 .hero h1 .l2{display:block}
-.hero .tag{margin-top:1.1rem;font-size:clamp(.62rem,1.25vw,.82rem);font-weight:300;
-  letter-spacing:.3em;color:#fff;text-transform:uppercase}
-.scrollcue{position:absolute;left:50%;bottom:26px;z-index:2;width:1px;height:54px;
-  background:linear-gradient(rgba(255,255,255,.75),rgba(255,255,255,0));animation:cue 2.4s ease-in-out infinite}
-@keyframes cue{0%,100%{opacity:.25;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+.hero .tag{margin-top:14px;font-size:clamp(.56rem,.78vw,13px);font-weight:300;
+  letter-spacing:.3em;text-transform:uppercase;margin-right:-.3em}
 
-/* ---------- shared section ---------- */
-.wrap{max-width:var(--wrap);margin:0 auto;width:100%}
+/* ---------- shared ---------- */
+.wrap{width:var(--col);max-width:calc(100% - 40px);margin:0 auto}
 section{position:relative}
-.sec-pad{padding:clamp(70px,10vw,124px) clamp(20px,5vw,54px)}
-h2{font-family:var(--display);font-weight:400;font-size:clamp(2rem,4.6vw,2.9rem);
-  line-height:1.15;letter-spacing:.04em}
+h2{font-family:var(--display);font-weight:400;font-size:clamp(1.9rem,3.1vw,45px);line-height:1.16}
 
-/* ---------- music ---------- */
-#music{background:transparent}
-#music::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,13,13,.90),rgba(13,13,13,.84) 45%,rgba(13,13,13,.94))}
-#music .wrap{position:relative;z-index:2}
-#music h2{text-align:center;margin-bottom:clamp(34px,5vw,54px)}
-.player{background:rgba(22,22,24,.94);border:1px solid rgba(255,255,255,.09);
-  box-shadow:0 26px 70px rgba(0,0,0,.55)}
-/* tall enough to show all four groups without a nested scrollbar */
-.player iframe{width:100%;height:1400px;border:0;display:block}
-.vid-head{margin:clamp(56px,7vw,84px) 0 24px;display:flex;align-items:baseline;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.vid-head h3{font-family:var(--display);font-weight:400;font-size:clamp(1.1rem,2.2vw,1.45rem);letter-spacing:.14em}
-.vid-head p{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.52)}
-.videos{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(14px,2vw,24px)}
-.vid{position:relative;border:1px solid rgba(255,255,255,.08);background:#000;overflow:hidden}
-.vid button{all:unset;display:block;cursor:pointer;width:100%;position:relative;aspect-ratio:16/9}
-.vid img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.22,1,.36,1),filter .5s;filter:brightness(.82)}
-.vid:hover img{transform:scale(1.045);filter:brightness(1)}
-.vid .play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
-.vid .play i{width:62px;height:62px;border-radius:50%;background:rgba(139,0,0,.86);
-  display:grid;place-items:center;transition:transform .35s cubic-bezier(.22,1,.36,1),background .3s}
-.vid .play i::after{content:"";border-left:17px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent;margin-left:5px}
-.vid:hover .play i{transform:scale(1.12);background:var(--red)}
-.vid figcaption{padding:14px 16px 16px;font-size:.85rem;color:rgba(255,255,255,.82);border-top:1px solid rgba(255,255,255,.07)}
-.vid iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+/* ---------- music: 1631px tall ---------- */
+#music{padding:42px 0 36px}
+#music::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:0}
+#music .wrap{position:relative;z-index:1}
+#music h2{text-align:center;margin-bottom:23px}
+.player{height:775px}
+.player iframe{width:100%;height:100%;border:0;display:block}
 
-/* ---------- about ---------- */
+/* gallery: one-row looping carousel — 428x241 items, 10px gap, like the Wix one */
+.gal{position:relative;margin-top:462px;overflow:hidden}
+.gal-track{display:flex;gap:var(--gap);will-change:transform;
+  transition:transform .62s cubic-bezier(.22,1,.36,1)}
+.gal-track.nosnap{transition:none}
+.gal-item{flex:0 0 var(--item);width:var(--item);position:relative;background:#000;overflow:hidden}
+.gal-item .shot{all:unset;display:block;cursor:pointer;width:100%;position:relative;aspect-ratio:428/241}
+.gal-item img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.22,1,.36,1)}
+.gal-item:hover img{transform:scale(1.04)}
+.play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.play i{width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.55);
+  display:grid;place-items:center;transition:background .3s,transform .3s}
+.play i::after{content:"";border-left:15px solid #fff;border-top:9px solid transparent;
+  border-bottom:9px solid transparent;margin-left:4px}
+.gal-item:hover .play i{background:rgba(0,0,0,.78);transform:scale(1.08)}
+.gal-item iframe{width:100%;aspect-ratio:428/241;border:0;display:block}
+.gal-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;
+  width:72px;height:72px;border:0;border-radius:50%;background:rgba(0,0,0,.62);
+  cursor:pointer;display:grid;place-items:center;transition:background .25s}
+.gal-nav:hover{background:rgba(0,0,0,.82)}
+.gal-nav.prev{left:23px}
+.gal-nav.next{right:23px}
+.gal-nav svg{width:30px;height:30px;stroke:#fff;stroke-width:1.4;fill:none}
+
+/* ---------- about: 599px, red, photo flush to both section edges ---------- */
 #about{background:var(--red)}
-.about{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.72fr);
-  gap:clamp(30px,5vw,68px);align-items:center}
-#about h2{margin-bottom:26px}
-.about p{font-size:clamp(.94rem,1.07vw,1rem);margin-bottom:1.15em;color:#fff}
+.about{display:grid;grid-template-columns:433px 305px;justify-content:space-between;
+  width:var(--col);max-width:calc(100% - 40px);margin:0 auto;min-height:599px}
+.about-copy{padding:35px 0}
+#about h2{margin-bottom:15px}
+.about p{font-size:15px;line-height:1.59;margin-bottom:1.1em}
 .about p:last-child{margin-bottom:0}
 .about strong{font-weight:600}
 .about em{font-style:italic}
-.about figure{position:relative}
-.about figure img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.about figure{height:100%}
+.about figure img{width:100%;height:100%;object-fit:cover}
 
-/* ---------- contact ---------- */
-#contact{background:transparent;text-align:center;overflow:hidden}
-#contact::after{content:"";position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(123,80,59,.42),rgba(0,0,0,.80))}
-#contact .wrap{position:relative;z-index:2}
-#contact h2{margin-bottom:28px}
-.mail{display:inline-block;font-family:var(--body);font-weight:300;
-  font-size:clamp(.95rem,2.1vw,1.2rem);letter-spacing:.06em;text-decoration:none;
-  color:#fff;padding-bottom:5px;border-bottom:1px solid transparent;transition:border-color .3s,opacity .3s}
-.mail:hover{border-color:rgba(255,255,255,.85)}
-.rule{width:min(420px,72%);height:1px;background:rgba(255,255,255,.42);margin:38px auto 30px}
-.social{display:flex;justify-content:center;gap:16px;list-style:none;margin-bottom:34px}
-.social a{display:grid;place-items:center;width:44px;height:44px;border:1px solid rgba(255,255,255,.34);
-  border-radius:50%;transition:background .3s,border-color .3s,transform .3s}
-.social a:hover{background:rgba(255,255,255,.12);border-color:#fff;transform:translateY(-3px)}
-.social svg{width:18px;height:18px;fill:#fff}
-.copy{font-size:.8rem;letter-spacing:.07em;color:rgba(255,255,255,.72)}
+/* ---------- contact: 420px ---------- */
+#contact{text-align:center;padding:55px 0 46px;overflow:hidden}
+#contact::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.72);z-index:0}
+#contact .wrap{position:relative;z-index:1}
+.mail{display:inline-block;margin-top:29px;font-size:17px;line-height:1.18;text-decoration:none;
+  color:#fff;border-bottom:1px solid transparent;transition:border-color .3s}
+.mail:hover{border-color:rgba(255,255,255,.8)}
+.rule{width:310px;max-width:80%;height:1px;background:rgba(255,255,255,.75);margin:37px auto 0}
+.social{display:flex;justify-content:center;gap:20px;list-style:none;margin-top:38px}
+.social a{display:grid;place-items:center;width:28px;height:28px;transition:opacity .25s}
+.social a:hover{opacity:.6}
+.social svg{width:26px;height:26px;fill:#fff}
+.copy{margin-top:95px;font-size:13px;line-height:1.15;color:#fff}
 
-/* ---------- reveals ---------- */
-.rv{opacity:0;transform:translateY(30px);transition:opacity .75s cubic-bezier(.22,1,.36,1),transform .75s cubic-bezier(.22,1,.36,1)}
+/* ---------- reveals: deliberately subtle, the Wix site has none ---------- */
+.rv{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
 .rv.in{opacity:1;transform:none}
 
 /* ---------- responsive ---------- */
-@media (max-width:900px){
-  .videos{grid-template-columns:1fr}
-  .about{grid-template-columns:1fr;gap:32px}
-  .about figure{order:-1;max-width:420px;margin-inline:auto}
-  .player iframe{height:1400px}
+@media (max-width:860px){
+  .about{grid-template-columns:1fr;min-height:0}
+  .about figure{order:-1;height:auto}
+  .about figure img{aspect-ratio:3/4;height:auto}
+  .about-copy{padding:32px 0 40px}
+  .gal{margin-top:120px}
+  .player{height:900px}
+  .gal-nav{width:54px;height:54px}
+  .gal-nav.prev{left:10px}
+  .gal-nav.next{right:10px}
+  #contact{padding:48px 0 44px}
+  .copy{margin-top:56px}
 }
 @media (max-width:720px){
   .burger{display:block}
-  .menu{position:fixed;inset:var(--navh) 0 auto 0;flex-direction:column;gap:0;
-    background:var(--red);padding:6px 0 18px;
-    clip-path:inset(0 0 100% 0);transition:clip-path .4s cubic-bezier(.22,1,.36,1)}
+  .menu{position:fixed;inset:var(--navh) 0 auto 0;flex-direction:column;gap:0;background:var(--red);
+    padding:4px 0 16px;clip-path:inset(0 0 100% 0);transition:clip-path .4s cubic-bezier(.22,1,.36,1)}
   .nav.open .menu{clip-path:inset(0 0 0 0)}
-  .menu a{display:block;padding:14px clamp(20px,6vw,40px);font-size:1rem}
+  .menu a{display:block;padding:13px clamp(18px,6vw,38px)}
   .menu a::after{display:none}
-  .hero{justify-content:center;text-align:center;padding-bottom:14vh}
-  .hero-inner{text-align:center}
-  .hero h1{letter-spacing:.3em;text-indent:.3em}
-  .player iframe{height:1440px}
+  .hero{justify-content:center;align-items:center;min-height:100svh;padding-top:var(--navh)}
+  .hero-inner{text-align:center;margin-right:0;padding:0 18px}
+  .hero h1{letter-spacing:.34em;margin-right:-.34em}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .rv{opacity:1;transform:none;transition:none}
-  .scrollcue{animation:none}
+  .gal-track{transition:none}
 }
 </style>
 </head>
@@ -191,77 +198,49 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(2rem,4.6vw,2.9rem)
 </nav>
 
 <header class="hero" id="top">
-  
   <div class="hero-inner">
     <h1>GRACE<span class="l2">KALLMAN</span></h1>
-    <p class="tag">Composer &nbsp;|&nbsp; Songwriter &nbsp;|&nbsp; Producer &nbsp;|&nbsp; Musician</p>
+    <p class="tag">Composer | Songwriter | Producer | Musician</p>
   </div>
-  <div class="scrollcue" aria-hidden="true"></div>
 </header>
 
-<section id="music" class="sec-pad">
+<section id="music">
   <div class="wrap">
     <h2 class="rv">MUSIC</h2>
 
     <div class="player rv">
       <iframe src="https://play.reelcrafter.com/embed/5ad47d9b-381b-4eb7-a070-f0b4faf4c565"
-              title="Grace Kallman — selected works player" loading="lazy"
+              title="Grace Kallman — selected works" loading="lazy"
               allow="autoplay; clipboard-write"></iframe>
     </div>
 
-    <div class="vid-head rv">
-      <h3>RESCORES</h3>
-      <p>Original scores to existing picture</p>
-    </div>
-
-    <div class="videos">
-      <figure class="vid rv" data-yt="3ulGhyKPvcg">
-        <button type="button" aria-label="Play: Over the Horizon | Corvette C8 (2025) — Original Rescore">
-          <img loading="lazy" src="images/v-corvette.jpg" alt="Blue Corvette C8 in motion">
-          <span class="play"><i></i></span>
-        </button>
-        <figcaption>Over the Horizon | Corvette C8 (2025) — Original Rescore</figcaption>
-      </figure>
-      <figure class="vid rv" data-yt="PoZXvW4WszI">
-        <button type="button" aria-label="Play: Spring (2019) — Original Rescore">
-          <img loading="lazy" src="images/v-spring.jpg" alt="Still from the animated short Spring">
-          <span class="play"><i></i></span>
-        </button>
-        <figcaption>Spring (2019) — Original Rescore</figcaption>
-      </figure>
-      <figure class="vid rv" data-yt="8sPEzR1I76g">
-        <button type="button" aria-label="Play: Charade (1963) — Original Rescore">
-          <img loading="lazy" src="images/v-charade.jpg" alt="Still from the 1963 film Charade">
-          <span class="play"><i></i></span>
-        </button>
-        <figcaption>Charade (1963) — Original Rescore</figcaption>
-      </figure>
-      <figure class="vid rv" data-yt="InHD-QsyHhk">
-        <button type="button" aria-label="Play: Sintel (2010) — Original Rescore">
-          <img loading="lazy" src="images/v-sintel.jpg" alt="Still from the animated short Sintel">
-          <span class="play"><i></i></span>
-        </button>
-        <figcaption>Sintel (2010) — Original Rescore</figcaption>
-      </figure>
+    <div class="gal rv" id="gal">
+      <div class="gal-track" id="track"></div>
+      <button class="gal-nav prev" id="galPrev" type="button" aria-label="Previous item" aria-controls="track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
+      </button>
+      <button class="gal-nav next" id="galNext" type="button" aria-label="Next item" aria-controls="track">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4l8 8-8 8"/></svg>
+      </button>
     </div>
   </div>
 </section>
 
-<section id="about" class="sec-pad">
-  <div class="wrap about">
-    <div>
+<section id="about">
+  <div class="about">
+    <div class="about-copy">
       <h2 class="rv">ABOUT ME</h2>
       <p class="rv">Grace Kallman is a composer, songwriter, producer, and multi-instrumentalist passionate about creating meaningful, evocative music. She studied at <strong>Dartmouth College</strong> and <strong>Berklee College of Music Online</strong>, earning a B.A. in Music and Physics and professional certificates in <em>Composing and Orchestrating for Film and TV</em> and <em>Music Production</em>.</p>
       <p class="rv">As a classically trained cellist, versatile vocalist, and amateur pianist, Grace brings a unique voice to every project. Drawing on her diverse musical background, as well as artistic and analytical perspectives, she composes across a wide range of styles, from orchestral, chamber, hybrid, and electronic scores to pop, rock, and folk songs. Her work has been recognized through the <strong>Spring 2026 Berklee Film Scoring Network Rescore Competition</strong>, where she was selected as the winner for her <em>Avatar: The Way of Water</em> scene rescore.</p>
       <p class="rv">Whether writing for media or the concert stage, she is passionate about crafting <strong>music that deepens emotion and serves the story</strong>.</p>
     </div>
-    <figure class="rv">
+    <figure>
       <img loading="lazy" src="images/about.jpg" alt="Grace Kallman performing with her cello and singing into a microphone">
     </figure>
   </div>
 </section>
 
-<section id="contact" class="sec-pad">
+<section id="contact">
   <div class="wrap">
     <h2 class="rv">CONTACT</h2>
     <a class="mail rv" href="mailto:gracekallman.music@gmail.com">gracekallman.music@gmail.com</a>
@@ -289,64 +268,109 @@ h2{font-family:var(--display);font-weight:400;font-size:clamp(2rem,4.6vw,2.9rem)
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var nav = document.getElementById('nav');
 
-  /* sticky state */
   var onScroll = function(){ nav.classList.toggle('solid', scrollY > 40); };
   addEventListener('scroll', onScroll, {passive:true}); onScroll();
 
-  /* mobile menu */
   var burger = document.getElementById('burger');
   burger.addEventListener('click', function(){
     var open = nav.classList.toggle('open');
     burger.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
   document.getElementById('menu').addEventListener('click', function(e){
-    if (e.target.tagName === 'A') { nav.classList.remove('open'); burger.setAttribute('aria-expanded','false'); }
+    if (e.target.tagName === 'A'){ nav.classList.remove('open'); burger.setAttribute('aria-expanded','false'); }
   });
 
-  /* staggered scroll reveals.
-     Position-based rather than IntersectionObserver-based on purpose: an element that is
-     jumped past (deep link to #about, restored scroll position, anchor click) never fires an
-     intersection and would otherwise stay invisible forever. */
-  var pending = [].slice.call(document.querySelectorAll('.rv'));
-  var show = function(el){
-    var sibs = [].slice.call(el.parentElement.children).filter(function(n){
-      return n.classList && n.classList.contains('rv');
+  /* ---- one-row looping gallery, matching the Wix carousel ---- */
+  var VIDEOS = [
+    {id:'3ulGhyKPvcg', img:'images/v-corvette.jpg', t:'Over the Horizon | Corvette C8 (2025) — Original Rescore', alt:'Blue Corvette C8 in motion'},
+    {id:'PoZXvW4WszI', img:'images/v-spring.jpg',   t:'Spring (2019) — Original Rescore',  alt:'Still from the animated short Spring'},
+    {id:'8sPEzR1I76g', img:'images/v-charade.jpg',  t:'Charade (1963) — Original Rescore', alt:'Still from the 1963 film Charade'},
+    {id:'InHD-QsyHhk', img:'images/v-sintel.jpg',   t:'Sintel (2010) — Original Rescore',  alt:'Still from the animated short Sintel'}
+  ];
+  var N = VIDEOS.length;
+  var track = document.getElementById('track');
+
+  var build = function(v, cloned){
+    var fig = document.createElement('figure');
+    fig.className = 'gal-item';
+    if (cloned) fig.setAttribute('aria-hidden', 'true');
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'shot';
+    b.setAttribute('aria-label', 'Play: ' + v.t);
+    if (cloned) b.tabIndex = -1;
+    var im = document.createElement('img');
+    im.src = v.img; im.alt = cloned ? '' : v.alt; im.loading = 'lazy';
+    var pl = document.createElement('span');
+    pl.className = 'play';
+    pl.appendChild(document.createElement('i'));
+    b.appendChild(im); b.appendChild(pl); fig.appendChild(b);
+    b.addEventListener('click', function(){
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + v.id + '?autoplay=1&rel=0';
+      f.title = v.t;
+      f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      f.allowFullscreen = true;
+      fig.replaceChild(f, b);
     });
-    var i = Math.max(0, sibs.indexOf(el));
-    el.style.transitionDelay = Math.min(i * 90, 360) + 'ms';
-    el.classList.add('in');
+    return fig;
   };
-  if (reduce) {
-    pending.forEach(function(el){ el.classList.add('in'); });
-    pending = [];
-  }
+  /* real set, then a cloned set so the last slide can run forward into the first */
+  VIDEOS.forEach(function(v){ track.appendChild(build(v, false)); });
+  VIDEOS.forEach(function(v){ track.appendChild(build(v, true)); });
+
+  var i = 0, animating = false;
+  var stride = function(){
+    var it = track.querySelector('.gal-item');
+    var g = parseFloat(getComputedStyle(track).gap);
+    return it ? it.getBoundingClientRect().width + (isNaN(g) ? 10 : g) : 438;
+  };
+  var place = function(instant){
+    track.classList.toggle('nosnap', !!instant);
+    track.style.transform = 'translate3d(' + (-i * stride()) + 'px,0,0)';
+    if (instant) void track.offsetWidth;   /* flush the style so the next move animates */
+  };
+  var go = function(d){
+    if (animating) return;
+    animating = true;
+    if (d < 0 && i === 0){ i = N; place(true); }   /* jump to the clone row, then walk back */
+    i += d;
+    if (reduce){
+      if (i >= N) i -= N;
+      place(true);
+      animating = false;
+      return;
+    }
+    place(false);
+    var done = function(){
+      track.removeEventListener('transitionend', done);
+      if (i >= N){ i -= N; place(true); }          /* landed on a clone: snap to the real one */
+      animating = false;
+    };
+    track.addEventListener('transitionend', done);
+    setTimeout(function(){ if (animating) done(); }, 900);  /* belt and braces */
+  };
+  document.getElementById('galNext').addEventListener('click', function(){ go(1); });
+  document.getElementById('galPrev').addEventListener('click', function(){ go(-1); });
+  addEventListener('resize', function(){ place(true); });
+  place(true);
+
+  /* ---- reveals: position-based, so an element jumped past (deep link, restored
+     scroll position) can never be stranded at opacity 0 the way an observer would ---- */
+  var pending = [].slice.call(document.querySelectorAll('.rv'));
+  if (reduce){ pending.forEach(function(el){ el.classList.add('in'); }); pending = []; }
   var sweep = function(){
-    for (var i = pending.length - 1; i >= 0; i--) {
-      if (pending[i].getBoundingClientRect().top < innerHeight * 0.92) {
-        show(pending[i]);
-        pending.splice(i, 1);
+    for (var k = pending.length - 1; k >= 0; k--){
+      if (pending[k].getBoundingClientRect().top < innerHeight * 0.94){
+        pending[k].classList.add('in');
+        pending.splice(k, 1);
       }
     }
   };
-  /* run directly, not through requestAnimationFrame: a janky frame must never be able to
-     strand an element at opacity 0. The pending list only shrinks, so this stays cheap. */
   addEventListener('scroll', sweep, {passive:true});
   addEventListener('resize', sweep);
   addEventListener('load', sweep);
   sweep();
-
-  /* click-to-load YouTube (keeps the page light, no third-party cookies until asked) */
-  document.querySelectorAll('.vid').forEach(function(fig){
-    fig.querySelector('button').addEventListener('click', function(){
-      var id = fig.getAttribute('data-yt');
-      var f = document.createElement('iframe');
-      f.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
-      f.title = fig.querySelector('figcaption').textContent;
-      f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      f.allowFullscreen = true;
-      fig.replaceChild(f, fig.querySelector('button'));
-    });
-  });
 })();
 </script>
 </body>
